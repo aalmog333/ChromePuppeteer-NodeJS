@@ -1,3 +1,6 @@
+console.log('hello from index');
+var fillForm = require('./fill-form');
+
 var express = require('express');
 var app = express();
 
@@ -7,23 +10,25 @@ app.use(bodyParser.urlencoded({
   extended: true
 })); // support encoded bodies
 
-// app.get('/', function (req, res) {
-//   console.log('here1');
-//   res.send('Hello World1')
-// });
+
 
 app.post('/request1', function(req, res) {
+
   console.log('here1');
-  console.log(req.body);
   var id = req.body.id;
   var phone = req.body.phone;
   console.log(id);
   console.log(phone);
-  res.send('Hello World1')
+  Promise.resolve(fillForm.firstFill(id, phone))
+    .then(() => {
+      console.log('here2');
+      res.send('Hello World1')
+    });
+
 });
 
 app.post('/request2', function(req, res) {
-  console.log('here2');
+  console.log('here3');
   var code = req.body.code;
   console.log(code);
   res.send('Hello World2')
