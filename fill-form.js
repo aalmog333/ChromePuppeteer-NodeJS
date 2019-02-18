@@ -1,17 +1,15 @@
-exports.firstFill = async function(id, phone) {
+exports.firstFill = async function(id, phone, page) {
 
   console.log('hello from fill form 1');
+
   let arr = this.splitPhoneNumber(phone);
   var prefix = arr[0];
-  var prefixVal = this.getPrefixValue(prefix);
-  console.log(prefix);
   var number = arr[1];
-  console.log(number);
+  var prefixVal = this.getPrefixValue(prefix);
+  console.log("prefix = " + prefix);
+  console.log("number = " + number);
+  console.log("prefixVal = " + prefixVal);
 
-  const puppeteer = require('puppeteer');
-
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
   await page.goto('https://customers.meitavdash.co.il/home/loginuser');
   await page.type('#id-identity-input', id, {
     delay: 100
@@ -19,74 +17,52 @@ exports.firstFill = async function(id, phone) {
   await page.type('#id-phone-input', number, {
     delay: 100
   }); // Types slower, like a user
-  // const element = await page.$("span.filter-option.pull-left");
+
   await page.click('button.btn.dropdown-toggle.btn-default');
   let element = await page.$('ul.dropdown-menu.inner li:nth-child(' + prefixVal + ')');
-  // var elements = await page.$('ul.dropdown-menu.inner li');
-  // var element = this.filterElements(elements, prefix);
-  console.log(element ? 'Has element!' : 'Failed to get element');
-  const text = await page.evaluate(element => element.textContent, element);
-  console.log(text);
-  await page.click('ul.dropdown-menu.inner li:nth-child(' + prefixVal + ')');
+
+  // console.log(element ? 'Has element!' : 'Failed to get element');
   // const text = await page.evaluate(element => element.textContent, element);
-  // await page.evaluate(element => {element.textContent = '052';}, element);
+  // console.log(text);
+  await page.click('ul.dropdown-menu.inner li:nth-child(' + prefixVal + ')');
+
   await Promise.all([
     page.waitForNavigation(),
     page.click('.cmp-btn.login-id-btn')
   ]);
-  // await element.type('052');
-  // await page.type('span.filter-option', '052'); // Types instantly
 
 
   await page.screenshot({
     path: 'meitavdash.png'
   });
-  // console.log(text);
-  await browser.close();
+
   console.log('goodbye from fill form 1');
 
 }
 
-exports.secondFill = function(code) {
+exports.secondFill = async function(code, page) {
 
   console.log('hello from fill form 2');
-  const puppeteer = require('puppeteer');
 
-  (async () => {
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    await page.goto('https://customers.meitavdash.co.il/home/loginuser');
-    await page.type('#id-identity-input', '201025863', {
-      delay: 100
-    }); // Types slower, like a user
-    await page.type('#id-phone-input', '6410318', {
-      delay: 100
-    }); // Types slower, like a user
-    // const element = await page.$("span.filter-option.pull-left");
-    await page.click('button.btn.dropdown-toggle.btn-default');
-    // let element = await page.$('#dropdown-menu inner ul:nth-child(0n+2) li:nth-child(0n+1)');
-    let element = await page.$('ul.dropdown-menu.inner li:nth-child(3)');
-    console.log(element ? 'Has element!' : 'Failed to get element');
-    await page.click('ul.dropdown-menu.inner li:nth-child(3)');
-    // const text = await page.evaluate(element => element.textContent, element);
-    // await page.evaluate(element => {element.textContent = '052';}, element);
-    await Promise.all([
-      page.waitForNavigation(),
-      page.click('.cmp-btn.login-id-btn')
-    ]);
-    // await element.type('052');
-    // await page.type('span.filter-option', '052'); // Types instantly
+  await page.type('#code-digits-input', code, {
+    delay: 100
+  }); // Types slower, like a user
 
+  await Promise.all([
+    page.waitForNavigation(),
+    page.click('.cmp-btn.login-code-btn')
+  ]);
 
-    await page.screenshot({
-      path: 'meitavdash.png'
-    });
-    // console.log(text);
-    await browser.close();
-  })();
+  await page.screenshot({
+    path: 'meitavdash.png'
+  });
+
+  const renderedContent = await page.evaluate(() => new XMLSerializer().serializeToString(document));
+  console.log(renderedContent);
 
   console.log('goodbye from fill form 2');
 
+  return renderedContent;
 }
 
 exports.splitPhoneNumber = function(phone) {
@@ -95,17 +71,6 @@ exports.splitPhoneNumber = function(phone) {
 
   return [prefix, number];
 }
-
-// exports.filterElements = function(elements, searchText) {
-//   var element = null
-//   for (var i = 0; i < elements.length; i++) {
-//     if (elements[i].textContent == searchText) {
-//       element = elements[i];
-//       break;
-//     }
-//   }
-//   return element;
-// }
 
 //TODO: get rid of this function
 exports.getPrefixValue = function(prefix) {
