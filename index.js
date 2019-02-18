@@ -1,29 +1,32 @@
-console.log('hello');
-const puppeteer = require('puppeteer');
+var express = require('express');
+var app = express();
 
-(async () => {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-  await page.goto('https://customers.meitavdash.co.il/home/loginuser');
-  await page.type('#id-identity-input', '201025863', {delay: 100}); // Types slower, like a user
-  await page.type('#id-phone-input', '6410318', {delay: 100}); // Types slower, like a user
-  // const element = await page.$("span.filter-option.pull-left");
-  await page.click('button.btn.dropdown-toggle.btn-default');
-  // let element = await page.$('#dropdown-menu inner ul:nth-child(0n+2) li:nth-child(0n+1)');
-  let element = await page.$('ul.dropdown-menu.inner li:nth-child(3)');
-  console.log(element ? 'Has element!' : 'Failed to get element');
-  await page.click('ul.dropdown-menu.inner li:nth-child(3)');
-  // const text = await page.evaluate(element => element.textContent, element);
-  // await page.evaluate(element => {element.textContent = '052';}, element);
-  await Promise.all([
-    page.waitForNavigation(),
-    page.click('.cmp-btn.login-id-btn')
-  ]);
-  // await element.type('052');
-  // await page.type('span.filter-option', '052'); // Types instantly
+var bodyParser = require('body-parser');
+app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.urlencoded({
+  extended: true
+})); // support encoded bodies
 
+// app.get('/', function (req, res) {
+//   console.log('here1');
+//   res.send('Hello World1')
+// });
 
-  await page.screenshot({path: 'meitavdash.png'});
-  // console.log(text);
-  await browser.close();
-})();
+app.post('/request1', function(req, res) {
+  console.log('here1');
+  console.log(req.body);
+  var id = req.body.id;
+  var phone = req.body.phone;
+  console.log(id);
+  console.log(phone);
+  res.send('Hello World1')
+});
+
+app.post('/request2', function(req, res) {
+  console.log('here2');
+  var code = req.body.code;
+  console.log(code);
+  res.send('Hello World2')
+});
+
+app.listen(3000);
